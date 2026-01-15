@@ -1,7 +1,8 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { useAccount, useReadContract, useWriteContract, useWaitForTransactionReceipt, useWatchContractEvent } from 'wagmi';
+import { useAccount, useReadContract, useWriteContract, useWaitForTransactionReceipt, useWatchContractEvent, useSwitchChain } from 'wagmi';
+import { baseSepolia } from 'wagmi/chains';
 import { parseEther } from 'viem';
 import { Camera, X } from 'lucide-react';
 import { PIXELATE_ADDRESS, PIXELATE_ABI, PIXELATE_SNAPSHOTS_ADDRESS, PIXELATE_SNAPSHOTS_ABI, type Pixel } from './contract';
@@ -38,7 +39,8 @@ interface LocalSnapshot {
 }
 
 export default function Home() {
-  const { address, isConnected } = useAccount();
+  const { address, isConnected, chainId } = useAccount();
+  const { switchChain } = useSwitchChain();
   const [selectedColor, setSelectedColor] = useState(1);
   const [hoveredPixel, setHoveredPixel] = useState<number | null>(null);
   const [mousePos, setMousePos] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
@@ -54,6 +56,14 @@ export default function Home() {
 
   // Ref to track pending pixel (avoids stale closure in event callback)
   const pendingPixelRef = useRef<{ index: number; color: number } | null>(null);
+
+  // Auto-switch to Base Sepolia if connected on wrong chain
+  useEffect(() => {
+    if (isConnected && chainId && chainId !== baseSepolia.id) {
+      console.log(`[Pixelate] ⚠️ Wrong chain detected (${chainId}), switching to Base Sepolia...`);
+      switchChain({ chainId: baseSepolia.id });
+    }
+  }, [isConnected, chainId, switchChain]);
 
   // Local pixel state for live updates
   const [localPixels, setLocalPixels] = useState<Pixel[] | null>(null);

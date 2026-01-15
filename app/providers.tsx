@@ -13,6 +13,7 @@ const config = createConfig({
   connectors: [
     coinbaseWallet({
       appName: 'Pixelate',
+      preference: 'smartWalletOnly',
     }),
   ],
   transports: {
@@ -38,8 +39,11 @@ export function Providers({ children }: { children: React.ReactNode }) {
           chain={baseSepolia}
           config={{
             appearance: {
-              mode: 'dark',
+              mode: 'dark'
             },
+            wallet: {
+              display: 'modal',
+            }
           }}
         >
           <MiniKitProvider enabled={true} autoConnect={true}>
