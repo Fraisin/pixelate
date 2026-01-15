@@ -1,6 +1,6 @@
 # Pixelate
 
-An onchain Base app.
+An onchain pixel canvas on Base. See [PROJECT.md](./PROJECT.md) for the full project plan.
 
 ## Getting Started
 
@@ -18,21 +18,38 @@ npm run dev
 
 Open [http://localhost:3000](http://localhost:3000) in your browser.
 
-### Build for production
+### Contracts
 
 ```bash
-npm run build
-npm run start
+cd contracts
+forge install    # Install dependencies
+forge build      # Compile
+forge test       # Run tests
 ```
 
 ## Deploy
 
-### Vercel (recommended)
+### Vercel (frontend)
 
-1. Push your code to GitHub
-2. Go to [vercel.com](https://vercel.com)
-3. Import your repository
-4. Click Deploy
+1. Push to GitHub
+2. Import repo at [vercel.com](https://vercel.com)
+3. Deploy
 
-Your app will be live at `https://your-project.vercel.app`
+### Contract (Base Sepolia)
 
+```bash
+cd contracts
+source ../.env
+forge script script/Pixelate.s.sol \
+    --private-key $PRIVATE_KEY \
+    --rpc-url https://sepolia.base.org \
+    --broadcast \
+    --verify \
+    --verifier blockscout \
+    --verifier-url https://base-sepolia.blockscout.com/api/
+```
+
+## Contract
+
+**Base Sepolia:** `0xAe0318F839594d0A3dA45e80cA9B57C8543D2235`  
+**Basescan:** [View](https://sepolia.basescan.org/address/0xae0318f839594d0a3da45e80ca9b57c8543d2235)
