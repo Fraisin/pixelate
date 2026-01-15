@@ -702,7 +702,7 @@ export default function Home() {
 
       {/* Bottom Action Bar - Only show when there are snapshots */}
       {localSnapshots.length > 0 && (
-        <div className="fixed bottom-0 left-0 right-0 bg-[#0a0a0a] border-t border-white/10 px-6 py-4 z-40">
+        <div className="fixed bottom-0 left-48 right-72 bg-[#0a0a0a] border-t border-white/10 px-6 py-4 z-40">
           <div className="flex items-center gap-4">
             {/* Snapshots */}
             <div className="flex gap-3 overflow-x-auto pb-1 flex-1">
