@@ -6,6 +6,7 @@ import { WagmiProvider, createConfig, http } from 'wagmi';
 import { baseSepolia } from 'wagmi/chains';
 import { coinbaseWallet } from 'wagmi/connectors';
 import { OnchainKitProvider } from '@coinbase/onchainkit';
+import { MiniKitProvider } from '@coinbase/onchainkit/minikit';
 
 const config = createConfig({
   chains: [baseSepolia],
@@ -37,11 +38,13 @@ export function Providers({ children }: { children: React.ReactNode }) {
           chain={baseSepolia}
           config={{
             appearance: {
-              mode: 'dark'
-            }
+              mode: 'dark',
+            },
           }}
         >
-          {mounted ? children : null}
+          <MiniKitProvider enabled={true} autoConnect={true}>
+            {mounted ? children : null}
+          </MiniKitProvider>
         </OnchainKitProvider>
       </QueryClientProvider>
     </WagmiProvider>

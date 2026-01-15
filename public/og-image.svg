@@ -1,0 +1,131 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" width="1200" height="630">
+  <defs>
+    <linearGradient id="heroBg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0a0a0a;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#121212;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#1a1a1a;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="heroAccent" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#0052FF;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#87CEEB;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  <!-- Background -->
+  <rect width="1200" height="630" fill="url(#heroBg)"/>
+  <!-- Grid pattern background -->
+  <g fill="#222" opacity="0.4">
+    <!-- Scattered pixels for atmosphere -->
+    <rect x="100" y="100" width="8" height="8"/>
+    <rect x="150" y="80" width="8" height="8"/>
+    <rect x="200" y="120" width="8" height="8"/>
+    <rect x="1050" y="500" width="8" height="8"/>
+    <rect x="1080" y="480" width="8" height="8"/>
+    <rect x="1020" y="520" width="8" height="8"/>
+    <rect x="80" y="500" width="8" height="8"/>
+    <rect x="120" y="520" width="8" height="8"/>
+    <rect x="1100" y="100" width="8" height="8"/>
+    <rect x="1060" y="130" width="8" height="8"/>
+  </g>
+  <!-- Large pixel canvas preview -->
+  <g transform="translate(350, 140)">
+    <!-- Canvas frame -->
+    <rect x="-10" y="-10" width="520" height="360" rx="8" fill="#1a1a1a" stroke="#333" stroke-width="2"/>
+    <!-- 8x8 pixel preview grid -->
+    <g>
+      <!-- Row 0 -->
+      <rect x="0" y="0" width="60" height="40" fill="#121212"/>
+      <rect x="60" y="0" width="60" height="40" fill="#0052FF"/>
+      <rect x="120" y="0" width="60" height="40" fill="#87CEEB"/>
+      <rect x="180" y="0" width="60" height="40" fill="#121212"/>
+      <rect x="240" y="0" width="60" height="40" fill="#E50000"/>
+      <rect x="300" y="0" width="60" height="40" fill="#121212"/>
+      <rect x="360" y="0" width="60" height="40" fill="#94E044"/>
+      <rect x="420" y="0" width="60" height="40" fill="#121212"/>
+      <!-- Row 1 -->
+      <rect x="0" y="40" width="60" height="40" fill="#E5D900"/>
+      <rect x="60" y="40" width="60" height="40" fill="#121212"/>
+      <rect x="120" y="40" width="60" height="40" fill="#CF6EE4"/>
+      <rect x="180" y="40" width="60" height="40" fill="#00D3DD"/>
+      <rect x="240" y="40" width="60" height="40" fill="#121212"/>
+      <rect x="300" y="40" width="60" height="40" fill="#FFA7D1"/>
+      <rect x="360" y="40" width="60" height="40" fill="#121212"/>
+      <rect x="420" y="40" width="60" height="40" fill="#0052FF"/>
+      <!-- Row 2 -->
+      <rect x="0" y="80" width="60" height="40" fill="#121212"/>
+      <rect x="60" y="80" width="60" height="40" fill="#E59500"/>
+      <rect x="120" y="80" width="60" height="40" fill="#121212"/>
+      <rect x="180" y="80" width="60" height="40" fill="#0083C7"/>
+      <rect x="240" y="80" width="60" height="40" fill="#820080"/>
+      <rect x="300" y="80" width="60" height="40" fill="#121212"/>
+      <rect x="360" y="80" width="60" height="40" fill="#A06A42"/>
+      <rect x="420" y="80" width="60" height="40" fill="#121212"/>
+      <!-- Row 3 -->
+      <rect x="0" y="120" width="60" height="40" fill="#888888"/>
+      <rect x="60" y="120" width="60" height="40" fill="#121212"/>
+      <rect x="120" y="120" width="60" height="40" fill="#0000EA"/>
+      <rect x="180" y="120" width="60" height="40" fill="#121212"/>
+      <rect x="240" y="120" width="60" height="40" fill="#02BE01"/>
+      <rect x="300" y="120" width="60" height="40" fill="#FFFFFF"/>
+      <rect x="360" y="120" width="60" height="40" fill="#121212"/>
+      <rect x="420" y="120" width="60" height="40" fill="#87CEEB"/>
+      <!-- Row 4 -->
+      <rect x="0" y="160" width="60" height="40" fill="#121212"/>
+      <rect x="60" y="160" width="60" height="40" fill="#0052FF"/>
+      <rect x="120" y="160" width="60" height="40" fill="#121212"/>
+      <rect x="180" y="160" width="60" height="40" fill="#E50000"/>
+      <rect x="240" y="160" width="60" height="40" fill="#121212"/>
+      <rect x="300" y="160" width="60" height="40" fill="#94E044"/>
+      <rect x="360" y="160" width="60" height="40" fill="#E5D900"/>
+      <rect x="420" y="160" width="60" height="40" fill="#121212"/>
+      <!-- Row 5 -->
+      <rect x="0" y="200" width="60" height="40" fill="#CF6EE4"/>
+      <rect x="60" y="200" width="60" height="40" fill="#121212"/>
+      <rect x="120" y="200" width="60" height="40" fill="#00D3DD"/>
+      <rect x="180" y="200" width="60" height="40" fill="#121212"/>
+      <rect x="240" y="200" width="60" height="40" fill="#FFA7D1"/>
+      <rect x="300" y="200" width="60" height="40" fill="#121212"/>
+      <rect x="360" y="200" width="60" height="40" fill="#0052FF"/>
+      <rect x="420" y="200" width="60" height="40" fill="#E59500"/>
+      <!-- Row 6 -->
+      <rect x="0" y="240" width="60" height="40" fill="#121212"/>
+      <rect x="60" y="240" width="60" height="40" fill="#0083C7"/>
+      <rect x="120" y="240" width="60" height="40" fill="#820080"/>
+      <rect x="180" y="240" width="60" height="40" fill="#121212"/>
+      <rect x="240" y="240" width="60" height="40" fill="#A06A42"/>
+      <rect x="300" y="240" width="60" height="40" fill="#888888"/>
+      <rect x="360" y="240" width="60" height="40" fill="#121212"/>
+      <rect x="420" y="240" width="60" height="40" fill="#0000EA"/>
+      <!-- Row 7 -->
+      <rect x="0" y="280" width="60" height="40" fill="#02BE01"/>
+      <rect x="60" y="280" width="60" height="40" fill="#FFFFFF"/>
+      <rect x="120" y="280" width="60" height="40" fill="#121212"/>
+      <rect x="180" y="280" width="60" height="40" fill="#87CEEB"/>
+      <rect x="240" y="280" width="60" height="40" fill="#0052FF"/>
+      <rect x="300" y="280" width="60" height="40" fill="#121212"/>
+      <rect x="360" y="280" width="60" height="40" fill="#E50000"/>
+      <rect x="420" y="280" width="60" height="40" fill="#121212"/>
+    </g>
+    <!-- Grid lines -->
+    <g stroke="#333" stroke-width="1" opacity="0.5">
+      <line x1="60" y1="0" x2="60" y2="320"/>
+      <line x1="120" y1="0" x2="120" y2="320"/>
+      <line x1="180" y1="0" x2="180" y2="320"/>
+      <line x1="240" y1="0" x2="240" y2="320"/>
+      <line x1="300" y1="0" x2="300" y2="320"/>
+      <line x1="360" y1="0" x2="360" y2="320"/>
+      <line x1="420" y1="0" x2="420" y2="320"/>
+      <line x1="0" y1="40" x2="480" y2="40"/>
+      <line x1="0" y1="80" x2="480" y2="80"/>
+      <line x1="0" y1="120" x2="480" y2="120"/>
+      <line x1="0" y1="160" x2="480" y2="160"/>
+      <line x1="0" y1="200" x2="480" y2="200"/>
+      <line x1="0" y1="240" x2="480" y2="240"/>
+      <line x1="0" y1="280" x2="480" y2="280"/>
+    </g>
+  </g>
+  <!-- Title -->
+  <text x="600" y="540" font-family="monospace" font-size="48" font-weight="bold" fill="url(#heroAccent)" text-anchor="middle">PIXELATE</text>
+  <!-- Tagline -->
+  <text x="600" y="580" font-family="sans-serif" font-size="18" fill="#888" text-anchor="middle">Paint the blockchain, one pixel at a time</text>
+</svg>
+

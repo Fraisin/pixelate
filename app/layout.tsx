@@ -5,6 +5,7 @@ import '@coinbase/onchainkit/styles.css';
 import { Providers } from './providers';
 import { Header } from './components/Header';
 import { Footer } from './components/Footer';
+import { minikitConfig } from '../minikit.config';
 
 const pixelFont = Press_Start_2P({
   weight: '400',
@@ -17,9 +18,24 @@ const inter = Inter({
   variable: '--font-inter',
 });
 
+const { miniapp } = minikitConfig;
+
 export const metadata: Metadata = {
-  title: 'Pixelate',
-  description: 'A shared pixel canvas on Base — like r/place, but onchain',
+  title: miniapp.name,
+  description: miniapp.description,
+  openGraph: {
+    title: miniapp.ogTitle,
+    description: miniapp.ogDescription,
+    images: [miniapp.ogImageUrl],
+  },
+  other: {
+    // Farcaster frame meta tags for Mini App embeds
+    'fc:frame': 'vNext',
+    'fc:frame:image': miniapp.heroImageUrl,
+    'fc:frame:button:1': 'Open Pixelate',
+    'fc:frame:button:1:action': 'launch_frame',
+    'fc:frame:button:1:target': miniapp.homeUrl,
+  },
 };
 
 export default function RootLayout({
