@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { useAccount, useReadContract, useWriteContract, useWaitForTransactionReceipt, useWatchContractEvent } from 'wagmi';
-import { Plus } from 'lucide-react';
 import { PIXELATE_ADDRESS, PIXELATE_ABI, type Pixel } from './contract';
 
 const GRID_SIZE = 64;
@@ -383,9 +382,6 @@ export default function Home() {
               style={{ backgroundColor: color }}
             />
           ))}
-          <button className="w-12 h-12 rounded border-2 border-dashed border-white/10 flex items-center justify-center hover:bg-white/5 transition-colors group">
-            <Plus className="w-5 h-5 text-gray-600 group-hover:scale-110 transition-transform" />
-          </button>
         </div>
 
         {/* Controls */}
