@@ -1,5 +1,6 @@
 'use client';
 
+import { Gamepad2 } from 'lucide-react';
 import {
   ConnectWallet,
   Wallet,
@@ -10,23 +11,29 @@ import { Avatar, Name, Address, Identity } from '@coinbase/onchainkit/identity';
 
 export function Header() {
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-6 py-4">
-      <h1 className="text-xl font-bold text-white">Pixelate</h1>
+    <nav className="h-16 border-b-4 border-black/40 flex items-center justify-between px-8 bg-[#121212] z-40">
+      <div className="flex items-center space-x-4">
+        <Gamepad2 className="w-8 h-8 text-[#D64545] accent-glow-red" />
+        <h1 className="pixel-font text-lg tracking-tight soft-text-shadow text-[#e5e5e5]">
+          PIXELATE
+        </h1>
+      </div>
 
-      <Wallet>
-        <ConnectWallet className="!bg-white !text-black">
-          <Avatar className="h-6 w-6" />
-          <Name />
-        </ConnectWallet>
-        <WalletDropdown>
-          <Identity className="px-4 pt-3 pb-2" hasCopyAddressOnClick>
-            <Avatar />
+      <div className="flex items-center space-x-6">
+        <Wallet>
+          <ConnectWallet>
             <Name />
-            <Address />
-          </Identity>
-          <WalletDropdownDisconnect />
-        </WalletDropdown>
-      </Wallet>
-    </header>
+          </ConnectWallet>
+          <WalletDropdown>
+            <Identity className="px-4 pt-3 pb-2" hasCopyAddressOnClick>
+              <Avatar />
+              <Name />
+              <Address />
+            </Identity>
+            <WalletDropdownDisconnect />
+          </WalletDropdown>
+        </Wallet>
+      </div>
+    </nav>
   );
 }
