@@ -89,14 +89,35 @@ export default function Home() {
     },
   });
 
-  // Read user's remaining cooldown
-  const { data: cooldownRemaining, refetch: refetchCooldown } = useReadContract({
+  // Read user's remaining cooldown from contract
+  const { data: cooldownFromContract, refetch: refetchCooldown } = useReadContract({
     address: PIXELATE_ADDRESS,
     abi: PIXELATE_ABI,
     functionName: 'getRemainingCooldown',
     args: address ? [address] : undefined,
     query: { enabled: !!address },
   });
+
+  // Local countdown state for live display
+  const [cooldownRemaining, setCooldownRemaining] = useState<number>(0);
+
+  // Sync contract cooldown to local state
+  useEffect(() => {
+    if (cooldownFromContract !== undefined) {
+      setCooldownRemaining(Number(cooldownFromContract));
+    }
+  }, [cooldownFromContract]);
+
+  // Tick down the countdown every second
+  useEffect(() => {
+    if (cooldownRemaining <= 0) return;
+
+    const timer = setTimeout(() => {
+      setCooldownRemaining((prev) => Math.max(0, prev - 1));
+    }, 1000);
+
+    return () => clearTimeout(timer);
+  }, [cooldownRemaining]);
 
   // Write contract hook for placing pixels
   const { 
@@ -171,14 +192,37 @@ export default function Home() {
     }
   }, [pixelData, localPixels]);
 
-  // Handle successful transaction (events handle pixel updates, we just refetch cooldown)
+  // Handle successful transaction - clear pending and update pixel as backup (in case event is slow)
   useEffect(() => {
-    if (isConfirmed) {
-      console.log(`[Pixelate] ✅ Transaction confirmed: ${txHash?.slice(0, 10)}...`);
-      refetchCooldown();
+    if (isConfirmed && pendingPixelRef.current) {
+      const { index, color } = pendingPixelRef.current;
+      const x = index % GRID_SIZE;
+      const y = Math.floor(index / GRID_SIZE);
+      
+      console.log(`[Pixelate] ✅ Transaction confirmed: ${txHash?.slice(0, 10)}... - locking pixel (${x}, ${y})`);
+      
+      // Update localPixels with the confirmed pixel
+      setLocalPixels((prev) => {
+        if (!prev) return prev;
+        const updated = [...prev];
+        updated[index] = {
+          color,
+          lastPlacer: address as `0x${string}`,
+          lastPlacedAt: BigInt(Math.floor(Date.now() / 1000)),
+        };
+        return updated;
+      });
+      
+      // Clear pending state
+      pendingPixelRef.current = null;
+      setPendingPixel(null);
+      
+      // Immediately start 60s cooldown (don't wait for refetch)
+      setCooldownRemaining(60);
+      refetchCooldown(); // Still refetch to sync with contract
       resetWrite();
     }
-  }, [isConfirmed, txHash, refetchCooldown, resetWrite]);
+  }, [isConfirmed, txHash, address, refetchCooldown, resetWrite]);
 
   const handlePixelClick = (index: number) => {
     if (!isConnected) {
@@ -186,7 +230,7 @@ export default function Home() {
       return;
     }
 
-    if (cooldownRemaining && cooldownRemaining > BigInt(0)) {
+    if (cooldownRemaining > 0) {
       alert(`Cooldown active: ${cooldownRemaining} seconds remaining`);
       return;
     }
@@ -299,8 +343,8 @@ export default function Home() {
       <div className="mt-6 text-sm text-gray-500 text-center">
         {!isConnected ? (
           <p>Connect wallet to place pixels</p>
-        ) : cooldownRemaining && cooldownRemaining > BigInt(0) ? (
-          <p className="text-yellow-500">Cooldown: {cooldownRemaining.toString()}s remaining</p>
+        ) : cooldownRemaining > 0 ? (
+          <p className="text-yellow-500">Cooldown: {cooldownRemaining}s remaining</p>
         ) : (
           <p>Click a pixel to place · 60s cooldown</p>
         )}
