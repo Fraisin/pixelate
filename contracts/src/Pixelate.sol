@@ -5,7 +5,7 @@ contract Pixelate {
     uint256 public constant WIDTH = 64;
     uint256 public constant HEIGHT = 64;
     uint256 public constant COOLDOWN = 60 seconds;
-    uint8 public constant PALETTE_SIZE = 16;
+    uint8 public constant PALETTE_SIZE = 32;
 
     struct Pixel {
         uint8 color;

@@ -89,8 +89,8 @@ contract PixelateTest is Test {
 
     function test_RevertOnInvalidColor() public {
         vm.prank(alice);
-        vm.expectRevert(abi.encodeWithSelector(Pixelate.InvalidColor.selector, 16, 16));
-        pixelate.placePixel(0, 0, 16);
+        vm.expectRevert(abi.encodeWithSelector(Pixelate.InvalidColor.selector, 32, 32));
+        pixelate.placePixel(0, 0, 32);
     }
 
     function test_CanPlace() public {
