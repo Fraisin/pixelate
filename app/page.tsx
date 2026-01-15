@@ -41,14 +41,7 @@ export default function Home() {
   };
 
   return (
-    <main className="min-h-screen bg-[#0a0a0a] text-white p-6 flex flex-col items-center">
-      <h1 className="text-3xl font-bold mb-4 text-white">Pixelate</h1>
-
-      {/* Wallet placeholder - teammate working on this */}
-      <div className="mb-4 text-sm text-gray-500">
-        [Wallet connection coming soon]
-      </div>
-      
+    <div className="text-white p-6 flex flex-col items-center">
       {/* Color Palette */}
       <div className="flex flex-wrap gap-3 justify-center mb-6 max-w-md">
         {PALETTE.map((color, i) => (
@@ -103,6 +96,6 @@ export default function Home() {
       <p className="mt-6 text-sm text-gray-500">
         Click a pixel to place · 60s cooldown (when connected)
       </p>
-    </main>
+    </div>
   );
 }
