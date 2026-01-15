@@ -48,6 +48,12 @@ export default function Home() {
   const [pendingPixel, setPendingPixel] = useState<{ index: number; color: number } | null>(null);
   const [showGrid, setShowGrid] = useState(true);
   const [zoom, setZoom] = useState(1);
+  const [showBottomSheet, setShowBottomSheet] = useState(true);
+
+  // Pan state for dragging canvas when zoomed
+  const [isPanning, setIsPanning] = useState(false);
+  const [panOffset, setPanOffset] = useState({ x: 0, y: 0 });
+  const [panStart, setPanStart] = useState({ x: 0, y: 0 });
 
   // Local snapshots (persisted in localStorage)
   const [localSnapshots, setLocalSnapshots] = useState<LocalSnapshot[]>([]);
@@ -388,6 +394,37 @@ export default function Home() {
     });
   };
 
+  // Pan handlers for dragging canvas when zoomed
+  const handlePanStart = (e: React.MouseEvent) => {
+    if (zoom <= 1) return; // Only enable panning when zoomed in
+    e.preventDefault();
+    setIsPanning(true);
+    setPanStart({ x: e.clientX - panOffset.x, y: e.clientY - panOffset.y });
+  };
+
+  const handlePanMove = (e: React.MouseEvent) => {
+    if (!isPanning) return;
+    const newX = e.clientX - panStart.x;
+    const newY = e.clientY - panStart.y;
+    // Limit pan to reasonable bounds
+    const maxPan = (canvasSize - 512) / 2 + 100;
+    setPanOffset({
+      x: Math.max(-maxPan, Math.min(maxPan, newX)),
+      y: Math.max(-maxPan, Math.min(maxPan, newY)),
+    });
+  };
+
+  const handlePanEnd = () => {
+    setIsPanning(false);
+  };
+
+  // Reset pan when zoom changes back to 1 or less
+  useEffect(() => {
+    if (zoom <= 1) {
+      setPanOffset({ x: 0, y: 0 });
+    }
+  }, [zoom]);
+
   // Capture current canvas state as a local snapshot
   const handleCapture = async () => {
     console.log('[Pixelate] 📸 Capturing canvas...');
@@ -406,6 +443,7 @@ export default function Home() {
         };
         
         setLocalSnapshots(prev => [snapshot, ...prev].slice(0, 10)); // Keep max 10 snapshots
+        setShowBottomSheet(true); // Reopen bottom sheet when new snapshot is taken
         console.log('[Pixelate] 📸 Snapshot saved locally');
       };
       reader.readAsDataURL(blob);
@@ -562,8 +600,19 @@ export default function Home() {
       </aside>
 
       {/* Center: Pixel Canvas */}
-      <main className="flex-1 flex flex-col items-center justify-center p-8 pb-28 canvas-container relative bg-[#121212]">
-        <div className="relative p-4 group">
+      <main
+        className={`flex-1 flex flex-col items-center justify-center p-8 pb-28 canvas-container relative bg-[#121212] overflow-hidden ${zoom > 1 ? 'cursor-grab' : ''} ${isPanning ? 'cursor-grabbing' : ''}`}
+        onMouseDown={handlePanStart}
+        onMouseMove={handlePanMove}
+        onMouseUp={handlePanEnd}
+        onMouseLeave={handlePanEnd}
+      >
+        <div
+          className="relative p-4 group transition-transform duration-75"
+          style={{
+            transform: `translate(${panOffset.x}px, ${panOffset.y}px)`,
+          }}
+        >
           {/* Loading Overlay */}
           {isLoadingPixels && !selectedSnapshot && (
             <div className="absolute inset-0 flex items-center justify-center bg-black/50 z-10 rounded">
@@ -700,9 +749,16 @@ export default function Home() {
         </div>
       </aside>
 
-      {/* Bottom Action Bar - Only show when there are snapshots */}
-      {localSnapshots.length > 0 && (
+      {/* Bottom Action Bar - Only show when there are snapshots and sheet is visible */}
+      {localSnapshots.length > 0 && showBottomSheet && (
         <div className="fixed bottom-0 left-48 right-72 bg-[#0a0a0a] border-t border-white/10 px-6 py-4 z-40">
+          {/* Close button */}
+          <button
+            onClick={() => setShowBottomSheet(false)}
+            className="absolute -top-3 right-4 w-6 h-6 bg-[#333] hover:bg-[#444] rounded-full flex items-center justify-center border border-white/20"
+          >
+            <X className="w-3 h-3 text-white" />
+          </button>
           <div className="flex items-center gap-4">
             {/* Snapshots */}
             <div className="flex gap-3 overflow-x-auto pb-1 flex-1">
@@ -756,6 +812,17 @@ export default function Home() {
             </div>
           )}
         </div>
+      )}
+
+      {/* Reopen button - shown when bottom sheet is closed but there are snapshots */}
+      {localSnapshots.length > 0 && !showBottomSheet && (
+        <button
+          onClick={() => setShowBottomSheet(true)}
+          className="fixed bottom-4 left-1/2 -translate-x-1/2 px-4 py-2 bg-[#262626] hover:bg-[#333] rounded-full pixel-font text-[9px] text-[#87CEEB] transition-colors border border-white/20 z-40 flex items-center gap-2"
+        >
+          <Camera className="w-3 h-3" />
+          {localSnapshots.length} SNAPSHOT{localSnapshots.length > 1 ? 'S' : ''}
+        </button>
       )}
     </>
   );
