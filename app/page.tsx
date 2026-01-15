@@ -37,6 +37,7 @@ export default function Home() {
   const { address, isConnected } = useAccount();
   const [selectedColor, setSelectedColor] = useState(1);
   const [hoveredPixel, setHoveredPixel] = useState<number | null>(null);
+  const [mousePos, setMousePos] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
   const [pendingPixel, setPendingPixel] = useState<{ index: number; color: number } | null>(null);
   const [showGrid, setShowGrid] = useState(true);
   const [zoom, setZoom] = useState(1);
@@ -281,11 +282,33 @@ export default function Home() {
 
   return (
     <>
+      {/* Cursor-following tooltip */}
+      {hoveredPixel !== null && localPixels && localPixels[hoveredPixel]?.lastPlacer !== ZERO_ADDRESS && (
+        <div
+          className="fixed bg-[#0a0a0a] text-white px-3 py-2 border border-[#333] text-xs pointer-events-none z-50 rounded shadow-lg"
+          style={{
+            left: mousePos.x + 12,
+            top: mousePos.y + 12,
+          }}
+        >
+          <div className="text-gray-400 mb-1">
+            ({getCoords(hoveredPixel).x}, {getCoords(hoveredPixel).y})
+          </div>
+          <div className="text-gray-500 text-[10px]">Placed by</div>
+          <div className="font-mono text-[10px] text-white break-all max-w-[280px]">
+            {localPixels[hoveredPixel].lastPlacer}
+          </div>
+          <div className="text-gray-500 text-[10px] mt-1">
+            {formatTimeAgo(localPixels[hoveredPixel].lastPlacedAt)}
+          </div>
+        </div>
+      )}
+
       {/* Center: Pixel Canvas */}
       <main className="flex-1 flex flex-col items-center justify-center p-8 canvas-container relative bg-[#121212]">
         <div className="relative p-4 group">
-          {/* Status/Coordinate Tooltip */}
-          <div className="absolute -top-12 left-1/2 -translate-x-1/2 bg-[#0a0a0a] text-white px-4 py-2 border-2 border-[#333] pixel-font text-[8px] pointer-events-none z-10 whitespace-nowrap">
+          {/* Status Bar */}
+          <div className="absolute -top-10 left-1/2 -translate-x-1/2 bg-[#0a0a0a] text-white px-4 py-2 border-2 border-[#333] pixel-font text-[8px] pointer-events-none z-10 whitespace-nowrap">
             {isLoadingPixels ? (
               <span className="text-yellow-400">LOADING...</span>
             ) : isWritePending ? (
@@ -293,15 +316,7 @@ export default function Home() {
             ) : isConfirming ? (
               <span className="text-yellow-400">PLACING PIXEL...</span>
             ) : hoveredPixel !== null ? (
-              <span>
-                ({getCoords(hoveredPixel).x}, {getCoords(hoveredPixel).y})
-                {localPixels && localPixels[hoveredPixel]?.lastPlacer !== ZERO_ADDRESS && (
-                  <span className="text-gray-400">
-                    {' · '}{shortenAddress(localPixels[hoveredPixel].lastPlacer)}{' · '}
-                    {formatTimeAgo(localPixels[hoveredPixel].lastPlacedAt)}
-                  </span>
-                )}
-              </span>
+              <span>({getCoords(hoveredPixel).x}, {getCoords(hoveredPixel).y})</span>
             ) : (
               <span className="text-gray-500">HOVER OVER CANVAS</span>
             )}
@@ -336,7 +351,11 @@ export default function Home() {
                   className={`pixel cursor-pointer ${isPending ? 'animate-pulse' : ''}`}
                   style={{ backgroundColor: PALETTE[displayColor] || PALETTE[0] }}
                   onClick={() => handlePixelClick(i)}
-                  onMouseEnter={() => setHoveredPixel(i)}
+                  onMouseEnter={(e) => {
+                    setHoveredPixel(i);
+                    setMousePos({ x: e.clientX, y: e.clientY });
+                  }}
+                  onMouseMove={(e) => setMousePos({ x: e.clientX, y: e.clientY })}
                   onMouseLeave={() => setHoveredPixel(null)}
                 />
               );
