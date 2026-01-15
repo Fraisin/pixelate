@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { useAccount, useReadContract, useWriteContract, useWaitForTransactionReceipt, useWatchContractEvent } from 'wagmi';
+import { Plus } from 'lucide-react';
 import { PIXELATE_ADDRESS, PIXELATE_ABI, type Pixel } from './contract';
 
 const GRID_SIZE = 64;
@@ -22,10 +23,12 @@ export default function Home() {
   const [selectedColor, setSelectedColor] = useState(1);
   const [hoveredPixel, setHoveredPixel] = useState<number | null>(null);
   const [pendingPixel, setPendingPixel] = useState<{ index: number; color: number } | null>(null);
-  
+  const [showGrid, setShowGrid] = useState(true);
+  const [zoom, setZoom] = useState(1);
+
   // Ref to track pending pixel (avoids stale closure in event callback)
   const pendingPixelRef = useRef<{ index: number; color: number } | null>(null);
-  
+
   // Local pixel state for live updates
   const [localPixels, setLocalPixels] = useState<Pixel[] | null>(null);
 
@@ -61,13 +64,13 @@ export default function Home() {
           color: number;
           placer: `0x${string}`;
         };
-        
+
         const index = Number(pixelId);
         const x = index % GRID_SIZE;
         const y = Math.floor(index / GRID_SIZE);
-        
+
         console.log(`[Pixelate] 🔴 LIVE: ${shortenAddress(placer)} placed pixel at (${x}, ${y}) color=${color}`);
-        
+
         // Update local state with new pixel
         setLocalPixels((prev) => {
           if (!prev) return prev;
@@ -79,7 +82,7 @@ export default function Home() {
           };
           return updated;
         });
-        
+
         // Clear pending if this was our pixel (use ref to avoid stale closure)
         if (pendingPixelRef.current?.index === index) {
           pendingPixelRef.current = null;
@@ -120,18 +123,18 @@ export default function Home() {
   }, [cooldownRemaining]);
 
   // Write contract hook for placing pixels
-  const { 
-    writeContract, 
-    data: txHash, 
-    isPending: isWritePending, 
+  const {
+    writeContract,
+    data: txHash,
+    isPending: isWritePending,
     reset: resetWrite,
     error: writeError,
     isError: isWriteError,
   } = useWriteContract();
 
   // Wait for transaction confirmation
-  const { 
-    isLoading: isConfirming, 
+  const {
+    isLoading: isConfirming,
     isSuccess: isConfirmed,
     error: txError,
   } = useWaitForTransactionReceipt({
@@ -166,9 +169,6 @@ export default function Home() {
     ? localPixels.map((p) => p.color)
     : Array(GRID_SIZE * GRID_SIZE).fill(0);
 
-  // Store full pixel data for hover info
-  const pixelInfo = localPixels;
-
   // Log when pixels are loaded from chain (only once on initial load)
   useEffect(() => {
     if (pixelData && localPixels === null) {
@@ -178,7 +178,7 @@ export default function Home() {
       );
       console.log(`[Pixelate] 📦 Loaded canvas: ${placedPixels.length} pixels placed`);
       console.log(`[Pixelate] 👂 Listening for live pixel updates...`);
-      
+
       // Log first few placed pixels
       placedPixels.slice(0, 5).forEach((p) => {
         const index = allPixels.indexOf(p);
@@ -198,9 +198,9 @@ export default function Home() {
       const { index, color } = pendingPixelRef.current;
       const x = index % GRID_SIZE;
       const y = Math.floor(index / GRID_SIZE);
-      
+
       console.log(`[Pixelate] ✅ Transaction confirmed: ${txHash?.slice(0, 10)}... - locking pixel (${x}, ${y})`);
-      
+
       // Update localPixels with the confirmed pixel
       setLocalPixels((prev) => {
         if (!prev) return prev;
@@ -212,11 +212,11 @@ export default function Home() {
         };
         return updated;
       });
-      
+
       // Clear pending state
       pendingPixelRef.current = null;
       setPendingPixel(null);
-      
+
       // Immediately start 60s cooldown (don't wait for refetch)
       setCooldownRemaining(60);
       refetchCooldown(); // Still refetch to sync with contract
@@ -262,93 +262,144 @@ export default function Home() {
   });
 
   const isProcessing = isWritePending || isConfirming;
+  const canvasSize = 512 * zoom;
 
   return (
-    <div className="text-white p-6 flex flex-col items-center">
-      {/* Color Palette */}
-      <div className="flex flex-wrap gap-3 justify-center mb-6 max-w-md">
-        {PALETTE.map((color, i) => (
-          <button
-            key={i}
-            onClick={() => setSelectedColor(i)}
-            className="relative flex justify-center items-center"
-            disabled={isProcessing}
+    <>
+      {/* Center: Pixel Canvas */}
+      <main className="flex-1 flex flex-col items-center justify-center p-8 canvas-container relative bg-[#121212]">
+        <div className="relative p-4 group">
+          {/* Status/Coordinate Tooltip */}
+          <div className="absolute -top-12 left-1/2 -translate-x-1/2 bg-[#0a0a0a] text-white px-4 py-2 border-2 border-[#333] pixel-font text-[8px] pointer-events-none z-10 whitespace-nowrap">
+            {isLoadingPixels ? (
+              <span className="text-yellow-400">LOADING...</span>
+            ) : isWritePending ? (
+              <span className="text-yellow-400">CONFIRM IN WALLET...</span>
+            ) : isConfirming ? (
+              <span className="text-yellow-400">PLACING PIXEL...</span>
+            ) : hoveredPixel !== null ? (
+              <span>COORD: {getCoords(hoveredPixel).x},{getCoords(hoveredPixel).y}</span>
+            ) : (
+              <span className="text-gray-500">HOVER OVER CANVAS</span>
+            )}
+          </div>
+
+          {/* Loading Overlay */}
+          {isLoadingPixels && (
+            <div className="absolute inset-0 flex items-center justify-center bg-black/50 z-10 rounded">
+              <div className="text-white pixel-font text-[10px]">Loading canvas...</div>
+            </div>
+          )}
+
+          {/* Grid Container */}
+          <div
+            className={`pixel-grid overflow-hidden ${isProcessing ? 'opacity-75' : ''}`}
+            style={{
+              width: `${canvasSize}px`,
+              height: `${canvasSize}px`,
+              gridTemplateColumns: `repeat(${GRID_SIZE}, 1fr)`,
+              gridTemplateRows: `repeat(${GRID_SIZE}, 1fr)`,
+              gap: showGrid ? '1px' : '0px',
+            }}
           >
-            <div
-              className={`w-7 h-7 rounded-full border-none z-10 ${isProcessing ? 'opacity-50' : ''}`}
+            {pixels.map((colorIndex, i) => {
+              // Show pending pixel optimistically
+              const displayColor = pendingPixel?.index === i ? pendingPixel.color : colorIndex;
+              const isPending = pendingPixel?.index === i;
+
+              return (
+                <div
+                  key={i}
+                  className={`pixel cursor-pointer ${isPending ? 'animate-pulse' : ''}`}
+                  style={{ backgroundColor: PALETTE[displayColor] || PALETTE[0] }}
+                  onClick={() => handlePixelClick(i)}
+                  onMouseEnter={() => setHoveredPixel(i)}
+                  onMouseLeave={() => setHoveredPixel(null)}
+                />
+              );
+            })}
+          </div>
+        </div>
+      </main>
+
+      {/* Right Sidebar: Palette */}
+      <aside className="w-72 border-l-4 border-black/20 p-6 flex flex-col z-40 bg-[#1a1a1a] overflow-y-auto">
+        <h2 className="pixel-font text-[10px] text-gray-500 mb-6 uppercase tracking-widest">
+          COLOR KIT
+        </h2>
+
+        {/* Color Palette Grid */}
+        <div className="grid grid-cols-4 gap-3">
+          {PALETTE.slice(1).map((color, i) => (
+            <button
+              key={i + 1}
+              onClick={() => setSelectedColor(i + 1)}
+              disabled={isProcessing}
+              className={`w-12 h-12 rounded border-2 border-black transition-transform hover:scale-110 ${
+                selectedColor === i + 1 ? 'color-btn-selected accent-glow-blue' : ''
+              } ${isProcessing ? 'opacity-50 cursor-not-allowed' : ''}`}
               style={{ backgroundColor: color }}
             />
-            {selectedColor === i && (
-              <div className="z-0 w-9 h-9 ring-2 ring-[#0052FF] absolute rounded-full" />
-            )}
+          ))}
+          <button className="w-12 h-12 rounded border-2 border-dashed border-white/10 flex items-center justify-center hover:bg-white/5 transition-colors group">
+            <Plus className="w-5 h-5 text-gray-600 group-hover:scale-110 transition-transform" />
           </button>
-        ))}
-      </div>
-
-      {/* Status Bar */}
-      <div className="h-6 mb-3 text-sm font-mono">
-        {isLoadingPixels ? (
-          <span className="text-yellow-400">Loading canvas...</span>
-        ) : isWritePending ? (
-          <span className="text-yellow-400">Confirm in wallet...</span>
-        ) : isConfirming ? (
-          <span className="text-yellow-400">Placing pixel...</span>
-        ) : hoveredPixel !== null ? (
-          <span className="text-gray-400">
-            ({getCoords(hoveredPixel).x}, {getCoords(hoveredPixel).y})
-          </span>
-        ) : (
-          <span className="text-gray-600">hover over canvas</span>
-        )}
-      </div>
-
-      {/* Canvas */}
-      <div className="relative">
-        {isLoadingPixels && (
-          <div className="absolute inset-0 flex items-center justify-center bg-black/50 z-10 rounded-lg">
-            <div className="text-white">Loading...</div>
-          </div>
-        )}
-        <div
-          className={`border border-gray-800 rounded-lg overflow-hidden shadow-2xl ${isProcessing ? 'opacity-75' : ''}`}
-          style={{
-            display: 'grid',
-            gridTemplateColumns: `repeat(${GRID_SIZE}, 8px)`,
-            gap: 0,
-          }}
-        >
-          {pixels.map((colorIndex, i) => {
-            // Show pending pixel optimistically
-            const displayColor = pendingPixel?.index === i ? pendingPixel.color : colorIndex;
-            const isPending = pendingPixel?.index === i;
-
-            return (
-              <div
-                key={i}
-                className={`w-2 h-2 cursor-pointer hover:opacity-75 ${isPending ? 'animate-pulse' : ''}`}
-                style={{ 
-                  backgroundColor: PALETTE[displayColor] || PALETTE[0],
-                  transition: 'opacity 150ms ease-out',
-                }}
-                onClick={() => handlePixelClick(i)}
-                onMouseEnter={() => setHoveredPixel(i)}
-                onMouseLeave={() => setHoveredPixel(null)}
-              />
-            );
-          })}
         </div>
-      </div>
 
-      {/* Footer Info */}
-      <div className="mt-6 text-sm text-gray-500 text-center">
-        {!isConnected ? (
-          <p>Connect wallet to place pixels</p>
-        ) : cooldownRemaining > 0 ? (
-          <p className="text-yellow-500">Cooldown: {cooldownRemaining}s remaining</p>
-        ) : (
-          <p>Click a pixel to place · 60s cooldown</p>
-        )}
-      </div>
-    </div>
+        {/* Controls */}
+        <div className="mt-10 space-y-6">
+          {/* Zoom Control */}
+          <div className="p-4 retro-card border-white/5">
+            <div className="flex items-center justify-between mb-4">
+              <span className="pixel-font text-[10px] text-gray-400">ZOOM</span>
+              <span className="text-[10px] font-bold text-[#87CEEB]">x{zoom}</span>
+            </div>
+            <input
+              type="range"
+              min="0.5"
+              max="2"
+              step="0.25"
+              value={zoom}
+              onChange={(e) => setZoom(parseFloat(e.target.value))}
+              className="w-full accent-[#87CEEB] h-1.5 bg-black rounded-lg appearance-none cursor-pointer"
+            />
+          </div>
+
+          {/* Grid Toggle */}
+          <div className="flex items-center justify-between px-2">
+            <span className="pixel-font text-[10px] text-gray-500">GRID LINES</span>
+            <button
+              onClick={() => setShowGrid(!showGrid)}
+              className="w-10 h-5 bg-black rounded-full relative"
+            >
+              <div
+                className={`absolute top-1 w-3 h-3 rounded-full transition-all ${
+                  showGrid
+                    ? 'left-1 bg-[#87CEEB] accent-glow-blue'
+                    : 'left-6 bg-gray-600'
+                }`}
+              />
+            </button>
+          </div>
+        </div>
+
+        {/* Status/Instructions */}
+        <div className="mt-auto p-4 border-2 border-dashed border-white/5 rounded text-center bg-black/20">
+          {!isConnected ? (
+            <p className="text-[9px] font-bold text-yellow-500 uppercase tracking-widest">
+              CONNECT WALLET TO PLACE
+            </p>
+          ) : cooldownRemaining > 0 ? (
+            <p className="text-[9px] font-bold text-yellow-500 uppercase tracking-widest">
+              COOLDOWN: {cooldownRemaining}S
+            </p>
+          ) : (
+            <p className="text-[9px] font-bold text-gray-600 uppercase tracking-widest">
+              CLICK TO PLACE · 60S COOLDOWN
+            </p>
+          )}
+        </div>
+      </aside>
+    </>
   );
 }
