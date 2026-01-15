@@ -3,7 +3,7 @@ import './globals.css';
 
 export const metadata: Metadata = {
   title: 'Pixelate',
-  description: 'An onchain Base app',
+  description: 'An onchain pixel canvas on Base',
 };
 
 export default function RootLayout({
@@ -17,4 +17,3 @@ export default function RootLayout({
     </html>
   );
 }
-
